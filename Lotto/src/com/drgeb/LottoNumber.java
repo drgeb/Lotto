@@ -10,13 +10,22 @@ public class LottoNumber {
     int stdDev=0;
     int delay;
     boolean isJoker=false;
+    private int drawNumber;
     
-    LottoNumber(int number, LocalDate date,boolean isJoker){
+    LottoNumber(int number, int drawNumber,LocalDate date,boolean isJoker){
 	this.number=number;
 	this.date=date;
 	this.isJoker=isJoker;
+	this.drawNumber=drawNumber;
     }
     
+    /**
+     * @return the drawNumber
+     */
+    public int getDrawNumber() {
+        return this.drawNumber;
+    }
+
     /**
      * @return the number
      */
