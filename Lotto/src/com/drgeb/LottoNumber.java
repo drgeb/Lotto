@@ -1,14 +1,14 @@
 package com.drgeb;
 
 import java.time.LocalDate;
-
+/*
+ * This class just contains the data as pure as possible from the datafile.
+ * It is basically a holding bin for a number keeping track of the date, draw#, and if it was selected as a Joker or not
+ */
 public class LottoNumber {
     int number=0;
     LocalDate date;
-    int countOccurance=0;
-    int average=0;
-    int stdDev=0;
-    int delay;
+
     boolean isJoker=false;
     private int drawNumber;
     
@@ -41,45 +41,9 @@ public class LottoNumber {
     }
 
     /**
-     * @return the countOccurance
-     */
-    public int getCountOccurance() {
-        return this.countOccurance;
-    }
-
-    /**
-     * @return the average
-     */
-    public int getAverage() {
-        return this.average;
-    }
-
-    /**
-     * @return the stdDev
-     */
-    public int getStdDev() {
-        return this.stdDev;
-    }
-
-    /**
-     * @return the delay
-     */
-    public int getDelay() {
-        return this.delay;
-    }
-
-    /**
      * @return the isJoker
      */
     public boolean isJoker() {
         return this.isJoker;
-    }
-
-    void computeAverage() {
-	
-    }
-    
-    void computeDelay(LocalDate dateLast,LocalDate datePrev ){
-	delay= dateLast.compareTo(datePrev);
     }
 }

@@ -7,19 +7,19 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
+//http://www.lotorainbow.com.br/en/default.asp
 public class App {
 
     public static void main(String[] args) {
 	File file = new File("results.txt");
-	ArrayList<LottoNumber> lottoNumbers = new ArrayList<LottoNumber>();
+	ArrayList<LottoNumber> allLottonNumbers = new ArrayList<LottoNumber>();
+	ArrayList<Drawing> drawings = new ArrayList<Drawing>();
+	ArrayList<DrawingResult> drawingResults = new ArrayList<DrawingResult>();
 
 	try (FileInputStream fileInputStream = new FileInputStream(file)) {
 	    Scanner sc = new Scanner(fileInputStream);
@@ -30,18 +30,28 @@ public class App {
 		String[] matcher = pattern.split(input);
 		LocalDate date = LocalDate.parse(matcher[0], DateTimeFormatter.ofPattern("d'-'MMM'-'yy"));
 		int drawNumber = Integer.valueOf(matcher[1]);
-		int joker = Integer.valueOf(matcher[3]);
+		LottoNumber joker = new LottoNumber(Integer.valueOf(matcher[3]), drawNumber, date, true);
 		int[] numbers = numPattern.splitAsStream(matcher[2]).mapToInt(i -> Integer.valueOf(i)).toArray();
+		ArrayList<LottoNumber> dNumbers = new ArrayList<LottoNumber>();
 		for (int number : numbers) {
 		    LottoNumber lottoNumber = new LottoNumber(number, drawNumber, date, false);
-		    lottoNumbers.add(lottoNumber);
+		    allLottonNumbers.add(lottoNumber);
+		    dNumbers.add(lottoNumber);
 		}
-		LottoNumber lottoJokerNumber = new LottoNumber(joker, drawNumber, date, true);
-		lottoNumbers.add(lottoJokerNumber);
+		allLottonNumbers.add(joker);
+		Drawing drawing = new Drawing.Builder().date(date).drawNumber(drawNumber).numbers(dNumbers).joker(joker)
+			.build();
+		drawings.add(drawing);
+		DrawingResult drawingResult = drawing.getDrawingResult();
+		drawingResults.add(drawingResult);
 	    }
+	    
 	    sc.close();
-	    TreeMap<Integer, LottoResult> frequencyMap = analyze(lottoNumbers);
-
+	    DrawingResultAnalysis drawingResultAnalysis = new DrawingResultAnalysis(drawingResults);
+	    drawingResultAnalysis.analyze();
+	    
+	    TreeMap<Integer, LottoResult> frequencyMap = analyze(allLottonNumbers);
+/*
 	    frequencyMap.keySet().stream().forEach(key -> {
 		LottoResult lottoResult = frequencyMap.get(key);
 		Integer value = lottoResult.getValue();
@@ -52,11 +62,12 @@ public class App {
 		double averageFrequencyDelayValue = lottoResult.getAverageFrequencyDelayValue();
 		double maxFrequencyDelayValue = lottoResult.getMaxFrequencyDelayValue();
 		String listString = delayArrayList.stream().map(r -> r.toString()).collect(Collectors.joining(", "));
-		System.out.println(
-			key + "\t" + value + " \t" + averageDelay + "\t" + frequencyDelayValue + "\t"
-				+ averageFrequencyDelayValue + "\t" + maxFrequencyDelayValue + "\t " + listString);
-	    });
 
+		System.out.println(key + "\t" + value + " \t" + averageDelay + "\t" + frequencyDelayValue + "\t"
+			+ averageFrequencyDelayValue + "\t" + maxFrequencyDelayValue + "\t " + listString);
+
+	    });
+*/
 	    TreeMap<Integer, LottoResult> sortedMap1 = sortByValues((TreeMap<Integer, LottoResult>) frequencyMap);
 	    TreeMap<Integer, LottoResult> sortedMap2 = sortByAverageDelay((TreeMap<Integer, LottoResult>) frequencyMap);
 	    TreeMap<Integer, LottoResult> sortedMap3 = sortByFrequencyDelayValue(
@@ -65,11 +76,12 @@ public class App {
 		    (TreeMap<Integer, LottoResult>) frequencyMap);
 	    TreeMap<Integer, LottoResult> sortedMap5 = sortByMaxFrequencyDelayValue(
 		    (TreeMap<Integer, LottoResult>) frequencyMap);
+
 	    sortedMap3.keySet().stream().forEach(key -> {
 		LottoResult lr = sortedMap3.get(key);
 		System.out.println(key + "\t" + lr.getValue());
-
 	    });
+
 	} catch (FileNotFoundException fileNotFoundException) {
 	    fileNotFoundException.printStackTrace();
 	} catch (IOException ioException) {
@@ -102,25 +114,6 @@ public class App {
 	});
 	return frequencyMap;
     }
-
-    // public static <Integer, LottoResult extends Comparable<LottoResult>>
-    // TreeMap sortByValues(final Map<java.lang.Integer, com.drgeb.LottoResult>
-    // frequencyMap) {
-    // Comparator<Integer> valueComparator = new Comparator<Integer>() {
-    // public int compare(Integer k1, Integer k2) {
-    // int compare = ((com.drgeb.LottoResult) frequencyMap.get(k2)).getValue() -
-    // ((com.drgeb.LottoResult) frequencyMap.get(k1)).getValue();
-    // if (compare == 0) return 1;
-    // else return compare;
-    // }
-    // };
-    // TreeMap<Integer, LottoResult> sortedByValues = new TreeMap<Integer,
-    // LottoResult>(valueComparator);
-    // sortedByValues.putAll((TreeMap<? extends Integer, ? extends LottoResult>)
-    // frequencyMap);
-    // return sortedByValues;
-    // }
-    // }
 
     public static <K, V extends Comparable<V>> TreeMap<Integer, LottoResult> sortByValues(
 	    final TreeMap<Integer, LottoResult> frequencyMap) {
@@ -174,7 +167,7 @@ public class App {
 	    public int compare(K k1, K k2) {
 		LottoResult l1 = frequencyMap.get(k1);
 		LottoResult l2 = frequencyMap.get(k2);
-		int compare = l1.getFrequencyDelayValue()-l2.getFrequencyDelayValue();
+		int compare = l1.getFrequencyDelayValue() - l2.getFrequencyDelayValue();
 		return compare;
 	    }
 	};
@@ -199,4 +192,5 @@ public class App {
 	sortedByValues.putAll(frequencyMap);
 	return sortedByValues;
     }
+
 }

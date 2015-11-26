@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.OptionalDouble;
 
-public class LottoResult {
+public class LottoResult implements ResultsAnalysis{
     // Main Key and Value Pairs
     int value;
     ArrayList<LottoNumber> lottoNumbers;
@@ -15,7 +15,6 @@ public class LottoResult {
     int frequencyDelayValue = 0;
     Double averageFrequencyDelayValue = 0D;
     Double maxFrequencyDelayValue = 0D;
-
     
     /**
      * @return the value
@@ -30,45 +29,45 @@ public class LottoResult {
 
     public void computeAll() {
 	computeDelayList();
-	this.averageDelay = computeAverageDelay();
-	this.frequencyDelayValue = computeFrequencyDelayValue();
-	this.averageFrequencyDelayValue = computeAverageFrequencyDelayValue();
-	this.maxFrequencyDelayValue = computeMaxFrequencyDelayValue();
+	computeAverageDelay();
+	computeFrequencyDelayValue();
+	computeAverageFrequencyDelayValue();
+	computeMaxFrequencyDelayValue();
     }
 
     /**
      * @return the delayList
      */
     public ArrayList<Integer> getDelayList() {
-        return this.delayList;
+	return this.delayList;
     }
 
     /**
      * @return the averageDelay
      */
     public Double getAverageDelay() {
-        return this.averageDelay;
+	return this.averageDelay;
     }
 
     /**
      * @return the frequencyDelayValue
      */
     public int getFrequencyDelayValue() {
-        return this.frequencyDelayValue;
+	return this.frequencyDelayValue;
     }
 
     /**
      * @return the averageFrequencyDelayValue
      */
     public Double getAverageFrequencyDelayValue() {
-        return this.averageFrequencyDelayValue;
+	return this.averageFrequencyDelayValue;
     }
 
     /**
      * @return the maxFrequencyDelayValue
      */
     public Double getMaxFrequencyDelayValue() {
-        return this.maxFrequencyDelayValue;
+	return this.maxFrequencyDelayValue;
     }
 
     /**
@@ -99,34 +98,22 @@ public class LottoResult {
 	return delayList;
     }
 
-    private Double computeAverageDelay() {
-	Double averageDelay = this.averageDelay;
-	if (averageDelay == 0D) {
-	    ArrayList<Integer> delayList = computeDelayList();
-	    OptionalDouble average = delayList.stream().mapToDouble(delay -> delay).average();
-	    averageDelay = average.isPresent() ? average.getAsDouble() : 0;
-	    this.averageDelay=averageDelay;
-	}
-	return averageDelay;
+    private void computeAverageDelay() {
+	OptionalDouble average = delayList.stream().mapToDouble(delay -> delay).average();
+	this.averageDelay = average.isPresent() ? average.getAsDouble() : 0;
     }
 
-    private int computeFrequencyDelayValue() {
-	ArrayList<Integer> delayList = computeDelayList();
-	int frequencyDelayValue = value * delayList.get(0);
-	return frequencyDelayValue;
+    private void computeFrequencyDelayValue() {
+	this.frequencyDelayValue = value * delayList.get(0);
     }
 
-    private Double computeAverageFrequencyDelayValue() {
-	ArrayList<Integer> delayList = computeDelayList();
-	Double averageDelay = computeAverageDelay();
-	Double averageFrequencyDelayValue = value * averageDelay;
-	return averageFrequencyDelayValue;
+    /* Must execute compteAverageDelay before this method */
+    private void computeAverageFrequencyDelayValue() {
+	this.averageFrequencyDelayValue = value * this.averageDelay;
     }
 
-    private Double computeMaxFrequencyDelayValue() {
-	ArrayList<Integer> delayList = computeDelayList();
+    private void computeMaxFrequencyDelayValue() {
 	OptionalDouble max = delayList.stream().mapToDouble(delay -> delay).max();
-	Double maxFrequencyDelayValue = max.isPresent() ? max.getAsDouble() : 0;
-	return maxFrequencyDelayValue;
+	this.maxFrequencyDelayValue = max.isPresent() ? max.getAsDouble() : 0;
     }
 }
