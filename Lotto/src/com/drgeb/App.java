@@ -11,8 +11,19 @@ import java.util.Comparator;
 import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
 //http://www.lotorainbow.com.br/en/default.asp
+/*
+//http://www.vnutz.com/megamillions_lottery/most_frequent_numbers
+// Strategies:
+	1.Most Frequent Numbers
+	2.Hot Wining Numbers
+	3.Cold Winning Numbers
+	4.Winning Pairs,
+	5.Winning Triples.
+	6.Winning Quadruples.
+	*/
+
 public class App {
 
     public static void main(String[] args) {

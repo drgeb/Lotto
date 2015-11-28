@@ -2,8 +2,11 @@ package com.drgeb;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class DrawingResultAnalysis {
@@ -18,23 +21,6 @@ public class DrawingResultAnalysis {
      */
     public ArrayList<DrawingResult> getDrawingResults() {
 	return this.drawingResults;
-    }
-
-    public static <K> Map<String, Long> sortByUniquePatternCount(final Map<String, Long> uniquePatternCounts) {
-
-	Comparator<K> valueComparator = new Comparator<K>() {
-	    @Override
-	    public int compare(K o1, K o2) {
-		Long l1 = uniquePatternCounts.get(o1);
-		Long l2 = uniquePatternCounts.get(o2);
-		int compare = l1.compareTo(l2);
-		System.out.println(o1+"\t"+o2+"\t"+l1+"\t"+l2);
-		return compare;
-	    }
-	};
-	Map<String, Long> sortedByValues = new TreeMap<String, Long>((Comparator<? super String>) valueComparator);
-	sortedByValues.putAll(uniquePatternCounts);
-	return sortedByValues;
     }
 
     /**
@@ -60,13 +46,13 @@ public class DrawingResultAnalysis {
 
     public void analyze() {
 	Map<String, Long> counts = drawingResults.stream()
-		.collect(Collectors.groupingBy(e -> e.getPatternCodeList(), Collectors.counting()));
-	this.uniquePatternCounts = counts;
-	this.sortedUniquePatternCount= sortByUniquePatternCount(this.uniquePatternCounts);
-	System.out.println("Unique Pattern Count");
-	printUniquePatterCountResults();
-	System.out.println("Sorted Unique Pattern Count");
-	printSortedUniquePatterCountResults();
+		.collect(Collectors.groupingBy(DrawingResult::getPatternCodeList, Collectors.counting()));
+	this.uniquePatternCounts = new TreeMap<String, Long>(counts);
+	
+        sortedUniquePatternCount=(LinkedHashMap) 	uniquePatternCounts.entrySet().stream()
+    	    .sorted(Map.Entry.comparingByValue((v1,v2)->v2.compareTo(v1)))
+    	    .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (v1,v2)->v1, LinkedHashMap::new));
+        
     }
 
     public void printUniquePatterCountResults() {
@@ -76,8 +62,10 @@ public class DrawingResultAnalysis {
     }
 
     public void printSortedUniquePatterCountResults() {
-	sortedUniquePatternCount.keySet().stream().forEach(key -> {
-	    System.out.println(key + "\t" + sortedUniquePatternCount.get(key));
-	});
+	if (sortedUniquePatternCount != null) {
+	    sortedUniquePatternCount.keySet().stream().forEach(key -> {
+		System.out.println(key + "\t" + sortedUniquePatternCount.get(key));
+	    });
+	}
     }
 }
